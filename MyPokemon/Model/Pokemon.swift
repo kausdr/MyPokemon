@@ -11,9 +11,11 @@ import SwiftData
 class Pokemon {
     var name: String
     var types: [PokemonType]
+    var spriteURL: String?
 
-    init(name: String, types: [PokemonType]) {
+    init(name: String, types: [PokemonType], spriteURL: String? = nil) {
         self.name = name
         self.types = types
+        self.spriteURL = spriteURL
     }
 }

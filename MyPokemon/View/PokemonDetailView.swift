@@ -22,16 +22,20 @@ struct PokemonDetailView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Mostra um indicador de progresso enquanto os detalhes carregam
             if let pokemon = detailedPokemon {
-                Text(pokemon.name.capitalized)
-                    .font(.largeTitle)
-                    .bold()
-                
+                if let urlString = pokemon.spriteURL, let url = URL(string: urlString) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 150)
+                    } placeholder: {
+                        ProgressView()
+                            .frame(height: 150)
+                    }
+                    .frame(maxWidth: .infinity) // Centraliza a imagem
+                }
                 Text("Tipos:")
                     .font(.title2)
-                
-                // --- AQUI ESTÁ O CÓDIGO CORRIGIDO ---
-                // O ForEach agora itera sobre os 'types' do nosso 'detailedPokemon'
-                // que é um array de 'PokemonType', então o id: \.id funciona.
                 ForEach(pokemon.types, id: \.id) { type in
                     Text(type.name.capitalized)
                         .padding(8)
@@ -46,6 +50,7 @@ struct PokemonDetailView: View {
         }
         .padding()
         .navigationTitle(pokemonInfo.name.capitalized)
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {

@@ -18,9 +18,14 @@ struct PokemonAPIService {
         let results: [PokemonBasic]
     }
     
+    private struct Sprites: Codable {
+        let front_default: String?
+    }
+    
     private struct PokemonResponse: Codable {
         let name: String
         let types: [TypeEntry]
+        let sprites: Sprites
     }
 
     private struct TypeEntry: Codable {
@@ -96,7 +101,12 @@ struct PokemonAPIService {
                     return PokemonType(id: id, name: typeEntry.type.name)
                 }
                 
-                let pokemon = Pokemon(name: apiResponse.name, types: pokemonTypes)
+                // Crie o objeto Pokemon, agora incluindo a URL do sprite
+                let pokemon = Pokemon(
+                    name: apiResponse.name,
+                    types: pokemonTypes,
+                    spriteURL: apiResponse.sprites.front_default // Salva a URL
+                )
                 completion(.success(pokemon))
                 
             } catch {
