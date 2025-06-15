@@ -41,10 +41,10 @@ class PokemonViewModel: ObservableObject {
     }
     
     // 3. 'toggleFavorite' agora recebe um 'PokemonInfo'
-    func toggleFavorite(pokemonInfo: PokemonInfo) {
+    func toggleFavorite(pokemon: Pokemon) {
         guard let modelContext = modelContext else { return }
 
-        let pokemonName = pokemonInfo.name
+        let pokemonName = pokemon.name
         let fetchDescriptor = FetchDescriptor<Pokemon>(
             predicate: #Predicate { $0.name == pokemonName }
         )
@@ -52,12 +52,20 @@ class PokemonViewModel: ObservableObject {
         do {
             if let existingFavorite = try modelContext.fetch(fetchDescriptor).first {
                 modelContext.delete(existingFavorite)
-                print("\(pokemonInfo.name.capitalized) removido dos favoritos.")
+                print("\(pokemon.name.capitalized) removido dos favoritos.")
             } else {
-                // Cria o @Model 'Pokemon' a partir do 'PokemonInfo' para salvar
-                let newFavorite = Pokemon(name: pokemonInfo.name, types: [])
-                modelContext.insert(newFavorite)
-                print("\(pokemonInfo.name.capitalized) adicionado aos favoritos.")
+                let favoriteToInsert = Pokemon(
+                   id: pokemon.id,
+                   name: pokemon.name,
+                   types: pokemon.types,
+                   spriteURL: pokemon.spriteURL,
+                   height: pokemon.height,
+                   weight: pokemon.weight,
+                   abilities: pokemon.abilities,
+                   stats: pokemon.stats
+               )
+               modelContext.insert(favoriteToInsert)
+               print("\(pokemon.name.capitalized) adicionado aos favoritos com ID: \(pokemon.id).")
             }
             fetchFavorites() // Atualiza a lista de favoritos
         } catch {

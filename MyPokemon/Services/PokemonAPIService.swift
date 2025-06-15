@@ -23,9 +23,14 @@ struct PokemonAPIService {
     }
     
     private struct PokemonResponse: Codable {
+        let id: Int
         let name: String
         let types: [TypeEntry]
         let sprites: Sprites
+        let height: Int
+        let weight: Int
+        let abilities: [AbilityInfo]
+        let stats: [StatInfo]
     }
 
     private struct TypeEntry: Codable {
@@ -36,6 +41,23 @@ struct PokemonAPIService {
     private struct TypeDetail: Codable {
         let name: String
         let url: String
+    }
+    
+    private struct AbilityInfo: Codable {
+        let ability: AbilityName
+    }
+    
+    private struct AbilityName: Codable {
+        let name: String
+    }
+    
+    private struct StatInfo: Codable {
+        let base_stat: Int
+        let stat: StatName
+    }
+    
+    private struct StatName: Codable {
+        let name: String
     }
     
     private func extractTypeId(from url: String) -> Int? {
@@ -100,12 +122,19 @@ struct PokemonAPIService {
                     guard let id = extractTypeId(from: typeEntry.type.url) else { return nil }
                     return PokemonType(id: id, name: typeEntry.type.name)
                 }
+                let abilities = apiResponse.abilities.map { $0.ability.name.capitalized }
+                let stats = apiResponse.stats.map { Stat(name: $0.stat.name, value: $0.base_stat) }
                 
                 // Crie o objeto Pokemon, agora incluindo a URL do sprite
                 let pokemon = Pokemon(
+                    id: apiResponse.id,
                     name: apiResponse.name,
                     types: pokemonTypes,
-                    spriteURL: apiResponse.sprites.front_default // Salva a URL
+                    spriteURL: apiResponse.sprites.front_default, // Salva a URL
+                    height: apiResponse.height, // Salva a Altura
+                    weight: apiResponse.weight, // Salva o Peso
+                    abilities: abilities, // Salva as Habilidades
+                    stats: stats // Salva os Status
                 )
                 completion(.success(pokemon))
                 

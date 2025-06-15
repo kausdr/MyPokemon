@@ -14,7 +14,8 @@ struct MyPokemonApp: App {
         let schema = Schema([
             Pokemon.self,
             PokemonType.self,
-            User.self
+            User.self,
+            Stat.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
