@@ -12,7 +12,9 @@ import SwiftData
 struct MyPokemonApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Pokemon.self,
+            PokemonType.self,
+            User.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +27,7 @@ struct MyPokemonApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            PokemonListView()
         }
         .modelContainer(sharedModelContainer)
     }

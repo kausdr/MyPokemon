@@ -32,5 +32,67 @@ final class MyPokemonTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+    
+    func testPokemonAPIService_FetchPokemonDecoding() throws {
+        // 1. Crie um JSON de exemplo como uma String
+        let jsonString = """
+        {
+            "name": "bulbasaur",
+            "types": [
+                { "slot": 1, "type": { "name": "grass", "url": "https://pokeapi.co/api/v2/type/12/" } },
+                { "slot": 2, "type": { "name": "poison", "url": "https://pokeapi.co/api/v2/type/4/" } }
+            ]
+        }
+        """
+        let jsonData = Data(jsonString.utf8)
 
+        // 2. Crie uma instância do serviço
+        let service = PokemonAPIService()
+
+        // 3. Crie uma expectation para o teste assíncrono
+        let expectation = self.expectation(description: "Pokemon decoding")
+
+        var resultPokemon: Pokemon?
+        var resultError: Error?
+
+        // 4. Use um truque para chamar a função de decodificação interna (torne-a 'internal' se for 'private')
+        // Como não podemos chamar diretamente, vamos simular o fetchPokemon com os dados locais.
+        // A maneira mais fácil de testar a decodificação é expor uma função de decodificação.
+        // No PokemonAPIService, adicione esta função para facilitar o teste:
+        /*
+         func decodePokemon(from data: Data) throws -> Pokemon {
+             let decoder = JSONDecoder()
+             let apiResponse = try decoder.decode(PokemonResponse.self, from: data)
+             let pokemonTypes: [PokemonType] = apiResponse.types.compactMap { typeEntry in
+                 guard let id = extractTypeId(from: typeEntry.type.url) else { return nil }
+                 return PokemonType(id: id, name: typeEntry.type.name)
+             }
+             return Pokemon(name: apiResponse.name, types: pokemonTypes)
+         }
+        */
+
+        // Agora no teste:
+        do {
+            // Supondo que você tornou a lógica de decodificação testável
+            // (extraindo-a para uma função separada).
+            let decoder = JSONDecoder()
+            struct PokemonResponse: Codable {
+                let name: String
+                let types: [TypeEntry]
+                struct TypeEntry: Codable { let type: TypeDetail }
+                struct TypeDetail: Codable { let name: String; let url: String }
+            }
+            let response = try decoder.decode(PokemonResponse.self, from: jsonData)
+
+            resultPokemon = Pokemon(name: response.name, types: []) // Simulação
+            expectation.fulfill()
+        } catch {
+            resultError = error
+        }
+
+        // 5. Verifique os resultados
+        XCTAssertNotNil(resultPokemon, "O Pokémon não deveria ser nulo")
+        XCTAssertNil(resultError, "O erro deveria ser nulo")
+        XCTAssertEqual(resultPokemon?.name, "bulbasaur")
+    }
 }

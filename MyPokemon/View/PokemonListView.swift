@@ -9,16 +9,23 @@ import SwiftUI
 
 struct PokemonListView: View {
     @StateObject var viewModel = PokemonViewModel()
-    
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
         TabView {
-            List {
-                ForEach(viewModel.pokemons, id: \.name) { pokemon in
-                    NavigationLink(destination: PokemonDetailView(pokemon: pokemon, viewModel: viewModel)) {
-                        HStack {
+            NavigationStack { // É bom ter um NavigationStack aqui
+                List {
+                    // O 'ForEach' agora itera sobre a lista de 'PokemonInfo'
+                    ForEach(viewModel.pokemons) { pokemon in // 'pokemon' aqui é um PokemonInfo
+                        NavigationLink(destination: PokemonDetailView(pokemonInfo: pokemon, viewModel: viewModel)) {
                             Text(pokemon.name.capitalized)
-                            Spacer()
                         }
+                    }
+                }
+                .navigationTitle("Pokémon")
+                .overlay {
+                    if viewModel.pokemons.isEmpty {
+                        ProgressView("Carregando Pokémon...")
                     }
                 }
             }
@@ -26,10 +33,14 @@ struct PokemonListView: View {
                 Label("Pokémon", systemImage: "house")
             }
             .onAppear {
-                viewModel.loadPokemons()
+                viewModel.setup(modelContext: modelContext)
+                
+                if viewModel.pokemons.isEmpty {
+                    viewModel.loadPokemons()
+                }
             }
             
-            FavoritesView(viewModel: viewModel)
+            FavoritesView()
                 .tabItem {
                     Label("Favoritos", systemImage: "heart.fill")
                 }

@@ -104,4 +104,14 @@ struct PokemonAPIService {
             }
         }.resume()
     }
+    
+    func decodePokemon(from data: Data) throws -> Pokemon {
+        let decoder = JSONDecoder()
+        let apiResponse = try decoder.decode(PokemonResponse.self, from: data)
+        let pokemonTypes: [PokemonType] = apiResponse.types.compactMap { typeEntry in
+            guard let id = extractTypeId(from: typeEntry.type.url) else { return nil }
+            return PokemonType(id: id, name: typeEntry.type.name)
+        }
+        return Pokemon(name: apiResponse.name, types: pokemonTypes)
+    }
 }
