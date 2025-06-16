@@ -24,14 +24,17 @@ class PokemonViewModel: ObservableObject {
     
     private let service = PokemonAPIService()
     private var modelContext: ModelContext?
+    private var currentUser: User?
     private var cancellables = Set<AnyCancellable>()
+    
     
     init() {
         setupFilteringAndSorting()
     }
 
-    func setup(modelContext: ModelContext) {
+    func setup(modelContext: ModelContext, currentUser: User?) {
         self.modelContext = modelContext
+        self.currentUser = currentUser
         fetchFavorites()
         fetchAllFilterOptions()
     }
@@ -141,48 +144,46 @@ class PokemonViewModel: ObservableObject {
     }
     
     func toggleFavorite(pokemon: Pokemon) {
-        guard let modelContext = modelContext else { return }
-
-        let pokemonName = pokemon.name
-        let fetchDescriptor = FetchDescriptor<Pokemon>(
-            predicate: #Predicate { $0.name == pokemonName }
-        )
-
-        do {
-            if let existingFavorite = try modelContext.fetch(fetchDescriptor).first {
-                modelContext.delete(existingFavorite)
-                print("\(pokemon.name.capitalized) removido dos favoritos.")
-            } else {
-                let favoriteToInsert = Pokemon(
-                   id: pokemon.id,
-                   name: pokemon.name,
-                   types: pokemon.types,
-                   spriteURL: pokemon.spriteURL,
-                   height: pokemon.height,
-                   weight: pokemon.weight,
-                   abilities: pokemon.abilities,
-                   stats: pokemon.stats
-               )
-               modelContext.insert(favoriteToInsert)
-               print("\(pokemon.name.capitalized) adicionado aos favoritos com ID: \(pokemon.id).")
+            guard let currentUser = currentUser, let modelContext = modelContext else {
+                print("Usuário não logado ou ModelContext não disponível.")
+                return
             }
-            fetchFavorites() // Atualiza a lista de favoritos
-        } catch {
-            print("Falha ao favoritar: \(error)")
+
+            if let index = currentUser.favoritePokemons.firstIndex(where: { $0.name == pokemon.name }) {
+                currentUser.favoritePokemons.remove(at: index)
+                print("\(pokemon.name.capitalized) removido dos favoritos do usuário \(currentUser.userName).")
+            } else {
+                // Adiciona aos favoritos
+                let favoriteToInsert = Pokemon(
+                    id: pokemon.id,
+                    name: pokemon.name,
+                    types: pokemon.types,
+                    spriteURL: pokemon.spriteURL,
+                    height: pokemon.height,
+                    weight: pokemon.weight,
+                    abilities: pokemon.abilities,
+                    stats: pokemon.stats
+                )
+                currentUser.favoritePokemons.append(favoriteToInsert)
+                print("\(pokemon.name.capitalized) adicionado aos favoritos do usuário \(currentUser.userName) com ID: \(pokemon.id).")
+            }
+            
+            do {
+                try modelContext.save()
+                fetchFavorites()
+            } catch {
+                print("Falha ao salvar favoritos: \(error)")
+            }
         }
-    }
     
     // 'fetchFavorites' continua igual, buscando o @Model 'Pokemon'
     private func fetchFavorites() {
-        guard let modelContext = modelContext else { return }
-        
-        do {
-            let descriptor = FetchDescriptor<Pokemon>(sortBy: [SortDescriptor(\.name)])
-            self.favorites = try modelContext.fetch(descriptor)
-            print("Favoritos do banco carregados: \(self.favorites.count) pokémons.")
-        } catch {
-            print("Falha ao carregar os favoritos do banco: \(error)")
+        guard let currentUser = currentUser else {
+            self.favorites = []
+            return
         }
+        self.favorites = currentUser.favoritePokemons.sorted(by: { $0.name < $1.name })
+        print("Favoritos do usuário \(currentUser.userName) carregados: \(self.favorites.count) pokémons.")
     }
     
     func fetchDetails(for pokemonName: String, completion: @escaping (Pokemon) -> Void) {

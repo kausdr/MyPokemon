@@ -10,13 +10,14 @@ import SwiftUI
 struct PokemonListView: View {
     @StateObject private var viewModel = PokemonViewModel()
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var authViewModel: UserAuthViewModel
 
     var body: some View {
         TabView {
-            NavigationStack { // É bom ter um NavigationStack aqui
+            NavigationStack {
                 List(viewModel.filteredPokemons) { pokemon in
                     NavigationLink(destination: PokemonDetailView(pokemonInfo: pokemon, viewModel: viewModel)) {
-                        Text(String(format: "#%03d", pokemon.id)) // Formata para ter 3 dígitos, ex: #001
+                        Text(String(format: "#%03d", pokemon.id))
                             .font(.caption)
                             .foregroundColor(.gray)
                         Text(pokemon.name.capitalized)
@@ -35,8 +36,6 @@ struct PokemonListView: View {
                             Button("All Pokémon") {
                                 viewModel.switchFilter(to: "All")
                             }
-                            
-                            // Submenu para Gerações
                             Menu("Generation") {
                                 ForEach(viewModel.allGenerations) { generation in
                                     Button(generation.name.capitalized) {
@@ -44,8 +43,6 @@ struct PokemonListView: View {
                                     }
                                 }
                             }
-                            
-                            // Submenu para Tipos
                             Menu("Type") {
                                 ForEach(viewModel.allTypes) { type in
                                     Button(type.name.capitalized) {
@@ -60,14 +57,11 @@ struct PokemonListView: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Menu {
-                            // Picker para escolher o campo de ordenação
                             Picker("Sort by", selection: $viewModel.sortOption) {
                                 ForEach(SortOption.allCases) { option in
                                     Text(option.rawValue).tag(option)
                                 }
                             }
-                            
-                            // Picker para escolher a ordem
                             Picker("Order", selection: $viewModel.sortOrder) {
                                 ForEach(SortOrder.allCases) { order in
                                     Text(order.rawValue).tag(order)
@@ -86,7 +80,7 @@ struct PokemonListView: View {
                 }
             }
             .onAppear {
-                viewModel.setup(modelContext: modelContext)
+                viewModel.setup(modelContext: modelContext, currentUser: authViewModel.currentUser)
                 if viewModel.pokemons.isEmpty {
                     viewModel.loadPokemons()
                 }
@@ -95,9 +89,15 @@ struct PokemonListView: View {
                 Label("Pokémon", systemImage: "list.bullet")
             }
             
-            FavoritesView()
+            FavoritesView(viewModel: viewModel)
                 .tabItem {
                     Label("Favoritos", systemImage: "heart.fill")
+                }
+            
+            ProfileView()
+                .environmentObject(authViewModel)
+                .tabItem {
+                    Label("Perfil", systemImage: "person.fill")
                 }
         }
     }
