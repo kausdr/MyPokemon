@@ -13,7 +13,7 @@ Lucas Nascimento
 ---
 
 ## ▶️ Vídeo Demonstração
-<a href="https://youtu.be/IPUVs191MOk" target="_blank">https://youtu.be/IPUVs191MOk</a>
+<a href="https://youtu.be/IPUVs191MOk">https://youtu.be/IPUVs191MOk</a>
 
 ## 🔍 Descrição Geral do Aplicativo
 
