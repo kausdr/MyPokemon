@@ -13,7 +13,19 @@ struct ContentView: View {
     var body: some View {
         Group {
             if authViewModel.currentUser != nil {
-                PokemonListView()
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button("Logout") {
+                            authViewModel.logout()
+                        }
+                        .padding()
+                        .buttonStyle(.borderedProminent)
+                    }
+
+                    PokemonListView()
+                        .environmentObject(authViewModel)
+                }
             } else {
                 LoginView()
             }
