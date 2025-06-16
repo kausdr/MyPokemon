@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct MyPokemonApp: App {
+    @StateObject var authViewModel = UserAuthViewModel()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Pokemon.self,
@@ -18,17 +20,13 @@ struct MyPokemonApp: App {
             Stat.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
+        return try! ModelContainer(for: schema, configurations: [modelConfiguration])
     }()
 
     var body: some Scene {
         WindowGroup {
-            PokemonListView()
+            ContentView()
+                .environmentObject(authViewModel)
         }
         .modelContainer(sharedModelContainer)
     }
