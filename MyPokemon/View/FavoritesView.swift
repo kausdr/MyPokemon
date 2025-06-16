@@ -20,7 +20,7 @@ struct FavoritesView: View {
                 // Criamos o NavigationLink que leva para a PokemonDetailView
                 NavigationLink(destination: PokemonDetailView(
                     // Criamos um PokemonInfo a partir do nosso Pokemon favoritado
-                    pokemonInfo: PokemonInfo(name: pokemon.name),
+                    pokemonInfo: PokemonInfo(id: pokemon.id, name: pokemon.name),
                     viewModel: viewModel
                 )) {
                     // O que aparece na lista

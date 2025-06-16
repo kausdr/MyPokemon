@@ -12,10 +12,11 @@ struct PokemonAPIService {
     struct PokemonBasic: Codable {
         let name: String
         let url: String
+        var id: Int?
     }
     
     private struct PokemonListResponse: Codable {
-        let results: [PokemonBasic]
+        var results: [PokemonBasic]
     }
     
     private struct Sprites: Codable {
@@ -88,7 +89,10 @@ struct PokemonAPIService {
             
             do {
                 let decoder = JSONDecoder()
-                let apiResponse = try decoder.decode(PokemonListResponse.self, from: data)
+                var apiResponse = try decoder.decode(PokemonListResponse.self, from: data)
+                for i in 0..<apiResponse.results.count {
+                    apiResponse.results[i].id = self.extractTypeId(from: apiResponse.results[i].url)
+                }
                 completion(.success(apiResponse.results))
             } catch {
                 completion(.failure(error))

@@ -48,3 +48,46 @@ func colorFor(typeName: String) -> Color {
         return Color.gray
     }
 }
+
+func backgroundImageFor(typeName: String) -> String {
+    switch typeName.lowercased() {
+    case "bug":
+        return "background_bug"
+    case "drak":
+        return "background_dark"
+    case "dragon":
+        return "background_dragon"
+    case "electric":
+        return "background_electric"
+    case "fairy":
+        return "background_fairy"
+    case "fighting":
+        return "background_fighting"
+    case "fire":
+        return "background_fire"
+    case "flying":
+        return "background_flying"
+    case "ghost":
+        return "background_ghost"
+    case "grass":
+        return "background_grass"
+    case "ground":
+        return "background_ground"
+    case "ice":
+        return "background_ice"
+    case "normal":
+        return "background_normal"
+    case "poison":
+        return "background_poison"
+    case "psychic":
+        return "background_psychic"
+    case "rock":
+        return "background_rock"
+    case "stell":
+        return "background_stell"
+    case "water":
+        return "background_water"
+    default:
+        return ""
+    }
+}

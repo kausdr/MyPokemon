@@ -18,6 +18,9 @@ struct PokemonListView: View {
                     // O 'ForEach' agora itera sobre a lista de 'PokemonInfo'
                     ForEach(viewModel.pokemons) { pokemon in // 'pokemon' aqui é um PokemonInfo
                         NavigationLink(destination: PokemonDetailView(pokemonInfo: pokemon, viewModel: viewModel)) {
+                            Text(String(format: "#%03d", pokemon.id)) // Formata para ter 3 dígitos, ex: #001
+                                .font(.caption)
+                                .foregroundColor(.gray)
                             Text(pokemon.name.capitalized)
                         }
                     }

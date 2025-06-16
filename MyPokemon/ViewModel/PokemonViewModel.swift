@@ -31,7 +31,11 @@ class PokemonViewModel: ObservableObject {
                 switch result {
                 case .success(let pokemonBasics):
                     // Mapeia o resultado da API para o nosso novo struct
-                    self.pokemons = pokemonBasics.map { PokemonInfo(name: $0.name) }
+                    self.pokemons = pokemonBasics.compactMap { basicInfo in
+                        // Garante que o ID foi extraído com sucesso
+                        guard let id = basicInfo.id else { return nil }
+                        return PokemonInfo(id: id, name: basicInfo.name)
+                    }
                     print("Lista de Pokémon carregada com \(self.pokemons.count) nomes.")
                 case .failure(let error):
                     print("Erro ao carregar Pokémons: \(error.localizedDescription)")
