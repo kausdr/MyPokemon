@@ -11,17 +11,36 @@ struct PokemonListView: View {
     @StateObject private var viewModel = PokemonViewModel()
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var authViewModel: UserAuthViewModel
-
+    
+    
+    let columns = [
+        GridItem(.adaptive(minimum: 150))
+    ]
+    
     var body: some View {
         TabView {
             NavigationStack {
-                List(viewModel.filteredPokemons) { pokemon in
-                    NavigationLink(destination: PokemonDetailView(pokemonInfo: pokemon, viewModel: viewModel)) {
-                        Text(String(format: "#%03d", pokemon.id))
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        Text(pokemon.name.capitalized)
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        ForEach(viewModel.filteredPokemons) { pokemon in
+                            NavigationLink(destination: PokemonDetailView(pokemonInfo: pokemon, viewModel: viewModel)) {
+                                VStack {
+                                    Text(String(format: "#%03d", pokemon.id))
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                    Text(pokemon.name.capitalized)
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.white)
+                                .cornerRadius(10)
+                                .shadow(radius: 2)
+                            }
+                        }
                     }
+                    .padding(.horizontal)
                 }
                 .navigationTitle("Pokémon")
                 .searchable(text: $viewModel.searchText, prompt: "Search by Name or Number")
