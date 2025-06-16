@@ -7,6 +7,12 @@
 
 import Foundation
 
+struct NamedAPIResource: Codable, Identifiable {
+    let name: String
+    let url: String
+    var id: String { name }
+}
+
 struct PokemonAPIService {
     
     struct PokemonBasic: Codable {
@@ -15,9 +21,25 @@ struct PokemonAPIService {
         var id: Int?
     }
     
+    private struct NamedAPIResourceListResponse: Codable {
+        let results: [NamedAPIResource]
+    }
+    
     private struct PokemonListResponse: Codable {
         var results: [PokemonBasic]
     }
+    
+    private struct TypeFilterResponse: Codable {
+        let pokemon: [PokemonEntry]
+    }
+    
+    struct PokemonEntry: Codable {
+        let pokemon: PokemonBasic
+    }
+    
+    private struct GenerationFilterResponse: Codable {
+       let pokemon_species: [PokemonBasic]
+   }
     
     private struct Sprites: Codable {
         let front_default: String?
@@ -61,12 +83,113 @@ struct PokemonAPIService {
         let name: String
     }
     
-    private func extractTypeId(from url: String) -> Int? {
+    func extractTypeId(from url: String) -> Int? {
         guard let lastComponent = url.split(separator: "/").filter({ !$0.isEmpty }).last,
               let id = Int(lastComponent) else {
             return nil
         }
         return id
+    }
+    
+    func fetchAllTypes(completion: @escaping (Result<[NamedAPIResource], Error>) -> Void) {
+        let urlString = "https://pokeapi.co/api/v2/type"
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "Dados não recebidos", code: 0)))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(NamedAPIResourceListResponse.self, from: data)
+                completion(.success(response.results))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    func fetchAllGenerations(completion: @escaping (Result<[NamedAPIResource], Error>) -> Void) {
+        let urlString = "https://pokeapi.co/api/v2/generation"
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "Dados não recebidos", code: 0)))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(NamedAPIResourceListResponse.self, from: data)
+                completion(.success(response.results))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    func fetchPokemonsByType(typeName: String, completion: @escaping (Result<[PokemonBasic], Error>) -> Void) {
+        let urlString = "https://pokeapi.co/api/v2/type/\(typeName.lowercased())"
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "Dados não recebidos", code: 0)))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(TypeFilterResponse.self, from: data)
+                let pokemonBasics = response.pokemon.map { $0.pokemon }
+                completion(.success(pokemonBasics))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+    
+    func fetchPokemonsByGeneration(generationId: Int, completion: @escaping (Result<[PokemonBasic], Error>) -> Void) {
+        let urlString = "https://pokeapi.co/api/v2/generation/\(generationId)"
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "Dados não recebidos", code: 0)))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(GenerationFilterResponse.self, from: data)
+                completion(.success(response.pokemon_species))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
     }
     
     func fetchAllPokemons(completion: @escaping (Result<[PokemonBasic], Error>) -> Void) {

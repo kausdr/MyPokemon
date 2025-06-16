@@ -53,7 +53,7 @@ func backgroundImageFor(typeName: String) -> String {
     switch typeName.lowercased() {
     case "bug":
         return "background_bug"
-    case "drak":
+    case "dark":
         return "background_dark"
     case "dragon":
         return "background_dragon"
@@ -83,8 +83,8 @@ func backgroundImageFor(typeName: String) -> String {
         return "background_psychic"
     case "rock":
         return "background_rock"
-    case "stell":
-        return "background_stell"
+    case "steel":
+        return "background_steel"
     case "water":
         return "background_water"
     default:
