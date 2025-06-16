@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct MyPokemonnApp: App {
+struct MyPokemonApp: App {
     @StateObject var authViewModel = UserAuthViewModel()
 
     var sharedModelContainer: ModelContainer = {
